@@ -4,57 +4,57 @@ import numpy as np
 
 maxVal = 0
 
-def mouseHandler(event, x, y, flags, data):
+# def mouseHandler(event, x, y, flags, data):
     
-    if event == cv2.EVENT_LBUTTONDOWN :
-        cv2.circle(data['img'], (x, y), 3, (0, 0, 255), 5, 16)
-        cv2.imshow("Image", data['img']);
-        if len(data['points']) < 4 :
-            data['points'].append([x, y])
+#     if event == cv2.EVENT_LBUTTONDOWN :
+#         cv2.circle(data['img'], (x, y), 3, (0, 0, 255), 5, 16)
+#         cv2.imshow("Image", data['img']);
+#         if len(data['points']) < 4 :
+#             data['points'].append([x, y])
 
-def getFourPoints(img):
+# def getFourPoints(img):
     
-    # Set up data to send to mouse handler
-    data = {}
-    data['img'] = img.copy()
-    data['points'] = []
+#     # Set up data to send to mouse handler
+#     data = {}
+#     data['img'] = img.copy()
+#     data['points'] = []
     
-    #Set the callback function for any mouse event
-    cv2.imshow("Image", img)
-    cv2.setMouseCallback("Image", mouseHandler, data)
-    cv2.waitKey(0)
+#     #Set the callback function for any mouse event
+#     cv2.imshow("Image", img)
+#     cv2.setMouseCallback("Image", mouseHandler, data)
+#     cv2.waitKey(0)
     
-    # Convert array to np.array
-    points = np.vstack(data['points']).astype(float)
+#     # Convert array to np.array
+#     points = np.vstack(data['points']).astype(float)
     
-    return points
+#     return points
 
-def rgbToHsv(red, green, blue):
+# def rgbToHsv(red, green, blue):
 
-    maxVal = max(red, green, blue)
-    minVal = min(red, green, blue)
+#     maxVal = max(red, green, blue)
+#     minVal = min(red, green, blue)
 
-    value = maxVal
+#     value = maxVal
 
-    if value != 0:
-        saturation = float((value - minVal) / value) * 255
-    else:
-        saturation = 0
+#     if value != 0:
+#         saturation = float((value - minVal) / value) * 255
+#     else:
+#         saturation = 0
 
-    if value == red:
-        hue = ((60 * (green - blue)) / (value - minVal) / 2)
-    elif value == green:
-        hue = ((120 + (60 * (blue - red))) / (value - minVal) / 2)
-    elif value == blue:
-        hue = ((240 + (60 * (red - green))) / (value - minVal) / 2)
+#     if value == red:
+#         hue = ((60 * (green - blue)) / (value - minVal) / 2)
+#     elif value == green:
+#         hue = ((120 + (60 * (blue - red))) / (value - minVal) / 2)
+#     elif value == blue:
+#         hue = ((240 + (60 * (red - green))) / (value - minVal) / 2)
 
-    if hue < 0:
-        hue += 360  / 2
+#     if hue < 0:
+#         hue += 360  / 2
 
-    if red == green == blue:
-        return 0, 0, 0
-    else:
-        return int(round(hue)), float(saturation), int(round(value))
+#     if red == green == blue:
+#         return 0, 0, 0
+#     else:
+#         return int(round(hue)), float(saturation), int(round(value))
 
 def createHsvPixel(hue, saturation, value):
 
@@ -69,7 +69,7 @@ def createHsvPixel(hue, saturation, value):
 
     return hsvPixel
 
-def testFunction(r, g, b):
+def calcHSV(r, g, b):
 
     newR = r / 255
     newG = g / 255
@@ -112,7 +112,7 @@ def convToHSV(inImg, outImg):
     for i in range(inImg.shape[0]):
         for j in range(inImg.shape[1]):
             rgbPixel = inImg[i][j]
-            h, s, v = testFunction(rgbPixel[2], rgbPixel[1], rgbPixel[0])
+            h, s, v = calcHSV(rgbPixel[2], rgbPixel[1], rgbPixel[0])
             hsvPixel = createHsvPixel(h, s, v)
             outImg[i][j] = hsvPixel
 
@@ -294,30 +294,30 @@ def nearest_neighbors(i, j, img, invMatH):
 
     return img[x, y,]
 
-def fix_image(img, warpMat):
-    height, width, colorLayer = img.shape
-    warpedImg = np.zeros((height, width, colorLayer), dtype='uint8')
+# def fix_image(img, warpMat):
+#     height, width, colorLayer = img.shape
+#     warpedImg = np.zeros((height, width, colorLayer), dtype='uint8')
 
-    for i in range(warpedImg.shape[0] - 1):
-        for j in range(warpedImg.shape[1] - 1):
-            newY = int(((warpMat[0][0] * i) + (warpMat[0][1] * j) + warpMat[0][2]) / ((warpMat[2][0] * i) + (warpMat[2][1] * j) + warpMat[2][2]))
-            newX = int(((warpMat[1][0] * i) + (warpMat[1][1] * j) + warpMat[1][2]) / ((warpMat[2][0] * i) + (warpMat[2][1] * j) + warpMat[2][2]))
+#     for i in range(warpedImg.shape[0] - 1):
+#         for j in range(warpedImg.shape[1] - 1):
+#             newY = int(((warpMat[0][0] * i) + (warpMat[0][1] * j) + warpMat[0][2]) / ((warpMat[2][0] * i) + (warpMat[2][1] * j) + warpMat[2][2]))
+#             newX = int(((warpMat[1][0] * i) + (warpMat[1][1] * j) + warpMat[1][2]) / ((warpMat[2][0] * i) + (warpMat[2][1] * j) + warpMat[2][2]))
 
-            if newX > width:
-                newX = width
-            elif newX < 0:
-                newX = 0
+#             if newX > width:
+#                 newX = width
+#             elif newX < 0:
+#                 newX = 0
 
-            if newY > height:
-                newY = height
-            elif newY < 0:
-                newY = 0
+#             if newY > height:
+#                 newY = height
+#             elif newY < 0:
+#                 newY = 0
 
-            print("newX: ", newX)
-            print("newY: ", newY)
+#             print("newX: ", newX)
+#             print("newY: ", newY)
 
-            if newX <= width and newY <= height:
-                print("IF")
-                warpedImg[newX][newY] = img[i][j]
+#             if newX <= width and newY <= height:
+#                 print("IF")
+#                 warpedImg[newX][newY] = img[i][j]
 
-    return warpedImg
+#     return warpedImg

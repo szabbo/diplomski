@@ -77,15 +77,24 @@ rgbImgRef = cv2.imread(rgbImgRefPath)
 # srcPts = np.array([[redSrcJ, redSrcI], [yellowSrcJ, yellowSrcI], [greenSrcJ, greenSrcI], [blueSrcJ, blueSrcI]])
 # refPts = np.array([[redRefJ, redRefI], [yellowRefJ, yellowRefI], [greenRefJ, greenRefI], [blueRefJ, blueRefI]])
 
-# # h, status = cv2.findHomography(srcPts, refPts)
-# matH = findMatrixH(srcPts, refPts)
+
+srcPts = np.array([[270, 146], [972, 231], [894, 467], [289, 353]])
+refPts = np.array([[290, 154], [1001, 209], [938, 447], [324, 359]])
+
+print(srcPts)
+print(refPts)
+
+# h, status = cv2.findHomography(srcPts, refPts)
+matH = findMatrixH(srcPts, refPts)
 
 
-# # with open('matH.pkl', 'wb') as handle:
-# #     pickle.dump(matH, handle, protocol=pickle.HIGHEST_PROTOCOL)
+# with open('matH.pkl', 'wb') as handle:
+#     pickle.dump(matH, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-with open('matH.pkl', 'rb') as handle:
-    matH = pickle.load(handle)
+# with open('matH.pkl', 'rb') as handle:
+#     matH = pickle.load(handle)
+
+# print(matH)
 
 angle = 10
 deltaX = 50
@@ -95,6 +104,9 @@ cosTheta = math.cos(angle * math.pi / 180)
 sinTheta = math.sin(angle * math.pi / 180)
 
 warpMat = [[cosTheta, -sinTheta, deltaX], [sinTheta, cosTheta, deltaY], [0, 0, 1]]
+# matH = np.array([[1.00202456e+00, 7.58026531e-02, 8.56782521e+00]
+#  [-4.29983455e-02, 9.98696653e-01, 1.98963007e+01]
+#  [-3.56814304e-06, 1.08887277e-05, 1.00000000e+00]])
 
 warpedImg = cv2.warpPerspective(rgbImgSrc, matH, (rgbImgSrc.shape[1], rgbImgSrc.shape[0]))
 myWarp = warpImg(rgbImgSrc, matH)
