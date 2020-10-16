@@ -2,60 +2,6 @@ import cv2
 import math
 import numpy as np
 
-maxVal = 0
-
-# def mouseHandler(event, x, y, flags, data):
-    
-#     if event == cv2.EVENT_LBUTTONDOWN :
-#         cv2.circle(data['img'], (x, y), 3, (0, 0, 255), 5, 16)
-#         cv2.imshow("Image", data['img']);
-#         if len(data['points']) < 4 :
-#             data['points'].append([x, y])
-
-# def getFourPoints(img):
-    
-#     # Set up data to send to mouse handler
-#     data = {}
-#     data['img'] = img.copy()
-#     data['points'] = []
-    
-#     #Set the callback function for any mouse event
-#     cv2.imshow("Image", img)
-#     cv2.setMouseCallback("Image", mouseHandler, data)
-#     cv2.waitKey(0)
-    
-#     # Convert array to np.array
-#     points = np.vstack(data['points']).astype(float)
-    
-#     return points
-
-# def rgbToHsv(red, green, blue):
-
-#     maxVal = max(red, green, blue)
-#     minVal = min(red, green, blue)
-
-#     value = maxVal
-
-#     if value != 0:
-#         saturation = float((value - minVal) / value) * 255
-#     else:
-#         saturation = 0
-
-#     if value == red:
-#         hue = ((60 * (green - blue)) / (value - minVal) / 2)
-#     elif value == green:
-#         hue = ((120 + (60 * (blue - red))) / (value - minVal) / 2)
-#     elif value == blue:
-#         hue = ((240 + (60 * (red - green))) / (value - minVal) / 2)
-
-#     if hue < 0:
-#         hue += 360  / 2
-
-#     if red == green == blue:
-#         return 0, 0, 0
-#     else:
-#         return int(round(hue)), float(saturation), int(round(value))
-
 def createHsvPixel(hue, saturation, value):
 
     tmpHSV = []
@@ -118,7 +64,7 @@ def convToHSV(inImg, outImg):
 
     return outImg
 
-def getPoints(imgMask, color):
+def getPoints(imgMask):
     rCnt = 0
     yCnt = 0
     gCnt = 0
@@ -130,26 +76,26 @@ def getPoints(imgMask, color):
             pixel = imgMask[i][j]
         
             if i <= imgMask.shape[0] / 2:
-                if j > 0 and j <= (imgMask.shape[1] / 2) and pixel == 255: # and color == "red":
+                if j > 0 and j <= (imgMask.shape[1] / 2) and pixel == 255: # red
                     ptsI = i
                     ptsJ = j
                     if rCnt == 32:
                         isFound = True
                     rCnt += 1
-                elif j > (imgMask.shape[1] / 2) and j <= imgMask.shape[1] and pixel == 255: # and color == "yellow":
+                elif j > (imgMask.shape[1] / 2) and j <= imgMask.shape[1] and pixel == 255: # yellow
                     ptsI = i
                     ptsJ = j
                     if yCnt == 32:
                         isFound = True
                     yCnt += 1
             if i > imgMask.shape[0] / 2: 
-                if j > (imgMask.shape[1] / 2) and j <= imgMask.shape[1] and pixel == 255: # and color == "green":
+                if j > (imgMask.shape[1] / 2) and j <= imgMask.shape[1] and pixel == 255: # green
                     ptsI = i
                     ptsJ = j
                     if gCnt == 32:
                         isFound = True
                     gCnt += 1
-                elif j > 0 and j <= (imgMask.shape[1] / 2) and pixel == 255: # and color == "blue":
+                elif j > 0 and j <= (imgMask.shape[1] / 2) and pixel == 255: # blue
                     ptsI = i
                     ptsJ = j
                     if bCnt == 32:
@@ -158,17 +104,11 @@ def getPoints(imgMask, color):
             if isFound:
                 break
 
+    print("I: ", ptsI)
+    print("J: ", ptsJ)
+
+    return
     return ptsI, ptsJ
-
-def imgStitch(srcImg, refImg):
-    for i in range(srcImg.shape[0]):
-        for j in range(srcImg.shape[1]):
-            pixel = srcImg[i][j]
-
-            if pixel.all() == 0:
-                srcImg[i][j] = refImg[i][j]
-
-    return srcImg
 
 def findMatrixH(srcPts, refPts):
     eq =[
@@ -268,8 +208,10 @@ def fixMissPixel(img, orgImg, matH):
 
 def nearest_neighbors(i, j, img, invMatH):
     x_max, y_max = img.shape[0] - 1, img.shape[1] - 1
-    x, y, _ = invMatH @ np.array([i, j, 1])
+    # x, y, _ = invMatH @ np.array([i, j, 1])
+    x, y, _ = invMatH.dot(np.array([i, j, 1]))
 
+    # tu si stao dovrsi
     if np.floor(x) == x and np.floor(y) == y:
         x, y = int(x), int(y)
         return img[x, y]
@@ -293,31 +235,3 @@ def nearest_neighbors(i, j, img, invMatH):
         y = y_max
 
     return img[x, y,]
-
-# def fix_image(img, warpMat):
-#     height, width, colorLayer = img.shape
-#     warpedImg = np.zeros((height, width, colorLayer), dtype='uint8')
-
-#     for i in range(warpedImg.shape[0] - 1):
-#         for j in range(warpedImg.shape[1] - 1):
-#             newY = int(((warpMat[0][0] * i) + (warpMat[0][1] * j) + warpMat[0][2]) / ((warpMat[2][0] * i) + (warpMat[2][1] * j) + warpMat[2][2]))
-#             newX = int(((warpMat[1][0] * i) + (warpMat[1][1] * j) + warpMat[1][2]) / ((warpMat[2][0] * i) + (warpMat[2][1] * j) + warpMat[2][2]))
-
-#             if newX > width:
-#                 newX = width
-#             elif newX < 0:
-#                 newX = 0
-
-#             if newY > height:
-#                 newY = height
-#             elif newY < 0:
-#                 newY = 0
-
-#             print("newX: ", newX)
-#             print("newY: ", newY)
-
-#             if newX <= width and newY <= height:
-#                 print("IF")
-#                 warpedImg[newX][newY] = img[i][j]
-
-#     return warpedImg
